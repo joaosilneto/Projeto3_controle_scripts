@@ -1,0 +1,21 @@
+% Passo 0: Preparação do Ambiente
+clear;
+clc;
+close all;
+
+num = 195.4;
+den = [1, 67.05, 195.4];
+G = tf(num, den);
+
+disp('Sistema em Malha Aberta G(s):');
+disp(G);
+
+
+figure; 
+rlocus(G); % Plota o LGR
+
+title('Lugar das Raízes (LGR) do Sistema');
+xlabel('Eixo Real');
+ylabel('Eixo Imaginário');
+grid on;
+axis equal;
