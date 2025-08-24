@@ -1,0 +1,30 @@
+
+clear;
+clc;
+close all;
+
+num = 195.4;
+
+den = [1, 67.05, 195.4];
+
+G = tf(num, den);
+
+disp('Sistema em Malha Aberta G(s):');
+disp(G);
+
+% Amplitude do degrau de entrada
+amplitude_degrau = 1.8;
+
+
+step(G * amplitude_degrau); 
+
+title('Resposta do Sistema em Malha Aberta a um Degrau de Amplitude 1.8');
+xlabel('Tempo (segundos)');
+ylabel('Amplitude de Saída');
+grid on;
+
+
+h_line = findobj(ax, 'Type', 'line'); % Pega a linha do gráfico
+
+
+legend(h_line, 'Resposta do Sistema y(t)', 'Location', 'southeast');
