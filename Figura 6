@@ -1,0 +1,7 @@
+plot(out.simout.Time, out.simout.Data, 'LineWidth', 1.5)
+xlabel('Tempo (s)')
+ylabel('Volts (V)')
+legend('Minha variável')
+grid on
+
+title('Resposta do sistema ao sinal de entrada')
