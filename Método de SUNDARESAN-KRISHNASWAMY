@@ -1,0 +1,75 @@
+%--------------------------------------------------------------------------
+% SCRIPT DE VALIDAÇÃO PARA O MODELO DE SUNDARESAN-KRISHNASWAMY
+%--------------------------------------------------------------------------
+
+% Passo 0: Preparação
+clear; clc; close all;
+
+%% Passo 1: Carregar os Dados Reais do Arquivo
+% Nome do arquivo que você salvou na sua Current Folder
+nome_do_arquivo = 'meus_dados.txt'; 
+
+try
+    dados_completos = load(nome_do_arquivo);
+catch
+    error('Arquivo "%s" não encontrado. Verifique se ele está salvo na mesma pasta que este script.', nome_do_arquivo);
+end
+
+% Separa os dados em vetores
+tempo_real = dados_completos(:, 1);
+entrada_real = dados_completos(:, 2);
+saida_real = dados_completos(:, 3);
+
+disp('Dados reais carregados com sucesso do arquivo!');
+
+% Isola e normaliza a resposta ao degrau para a plotagem
+indices_subida = find(entrada_real > 0.1, 1, 'first');
+tempo_analise = tempo_real(indices_subida:end) - tempo_real(indices_subida);
+saida_analise = saida_real(indices_subida:end) - saida_real(indices_subida-1);
+amplitude_degrau = max(entrada_real) - min(entrada_real);
+
+%% Passo 2: Definir o Modelo Identificado (Seus Cálculos)
+% Inserimos os parâmetros que você calculou pelo método de S-K
+K_sk = 0.9855;
+tau_sk = 0.1608;
+theta_sk = 0.0112;
+
+% Cria a função de transferência do seu modelo
+G_sk = tf(K_sk, [tau_sk, 1], 'InputDelay', theta_sk);
+
+disp('Modelo de Sundaresan-Krishnaswamy criado:');
+disp(G_sk);
+
+%% Passo 3: Simular a Resposta do Modelo Identificado
+% Usamos o mesmo vetor de tempo dos dados reais para uma comparação justa
+[saida_sk_simulada, ~] = step(G_sk * amplitude_degrau, tempo_analise);
+
+%% Passo 4: Gerar o Gráfico Comparativo Final
+figure;
+hold on;
+
+% Plota os dados reais (a "verdade") em azul sólido
+plot(tempo_analise, saida_analise, 'b-', 'LineWidth', 2.5, 'DisplayName', 'Dados Reais');
+
+% Plota a resposta do seu modelo em vermelho tracejado
+plot(tempo_analise, saida_sk_simulada, 'r--', 'LineWidth', 2, 'DisplayName', 'Modelo S-K (1ª Ordem)');
+
+hold off;
+
+% Configuração do Gráfico
+title('Validação do Modelo: Dados Reais vs. Sundaresan-Krishnaswamy');
+xlabel('Tempo (segundos)');
+ylabel('Amplitude de Saída');
+grid on;
+legend('show', 'Location', 'southeast');
+
+%% Passo 5: Calcular o Erro Quadrático Médio (MSE)
+% Garante que os vetores tenham o mesmo tamanho
+len_real = length(saida_analise);
+saida_sk_simulada = saida_sk_simulada(1:len_real);
+
+mse_sk = mean((saida_analise - saida_sk_simulada).^2);
+
+fprintf('\n--- Validação Estatística ---\n');
+fprintf('O Erro Quadrático Médio (MSE) do seu modelo S-K é: %.6f\n', mse_sk);
+fprintf('--------------------------------\n');
