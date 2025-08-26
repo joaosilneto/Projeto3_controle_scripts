@@ -27,9 +27,9 @@ amplitude_degrau = max(entrada_real) - min(entrada_real);
 
 %% Passo 3: Definir o Modelo de Smith Identificado
 % Inserimos os parâmetros que você calculou manualmente
-K_manual = 0.87455;
-tau_manual = 0.0525;
-theta_manual = 0; % Td desprezível
+K_manual = 0.89856;
+tau_manual = 0.165;
+theta_manual = 0.005; % Td desprezível
 
 G_smith = tf(K_manual, [tau_manual, 1], 'InputDelay', theta_manual);
 disp('Modelo de Smith (manual) criado:');
