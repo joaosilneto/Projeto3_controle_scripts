@@ -41,8 +41,8 @@ t_04 = tempo_analise(idx_04);
 
 fprintf('\n--- Pontos de Medição para o Método de Smith ---\n');
 fprintf('Valor final (100%%): %.4f V\n', y_final);
-fprintf('Ponto de 28%%: %.4f V ocorre no tempo t_35 = %.4f s\n', y_028_target, t_028);
-fprintf('Ponto de 40%%: %.4f V ocorre no tempo t_85 = %.4f s\n', y_04_target, t_04);
+fprintf('Ponto de 28%%: %.4f V ocorre no tempo t_28 = %.4f s\n', y_028_target, t_028);
+fprintf('Ponto de 40%%: %.4f V ocorre no tempo t_40 = %.4f s\n', y_04_target, t_04);
 fprintf('--------------------------------------------------\n');
 
 %% Passo 3: Gerar o Gráfico Anotado
