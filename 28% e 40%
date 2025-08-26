@@ -1,0 +1,79 @@
+%--------------------------------------------------------------------------
+% SCRIPT PARA PLOTAR A RESPOSTA AO DEGRAU COM PONTOS DE MEDIÇÃO DESTACADOS
+%--------------------------------------------------------------------------
+
+% Passo 0: Preparação
+clear; clc; close all;
+
+%% Passo 1: Carregar e Preparar os Dados Reais
+nome_do_arquivo = 'meus_dados.txt'; 
+try
+    dados_completos = load(nome_do_arquivo);
+catch
+    error('Arquivo "%s" não encontrado. Verifique se ele está salvo na mesma pasta que este script.', nome_do_arquivo);
+end
+
+% Separa os dados em vetores
+tempo_real = dados_completos(:, 1);
+entrada_real = dados_completos(:, 2);
+saida_real = dados_completos(:, 3);
+disp('Dados reais carregados com sucesso!');
+
+% Isola e normaliza a resposta ao degrau
+indices_subida = find(entrada_real > 0.1, 1, 'first');
+tempo_analise = tempo_real(indices_subida:end) - tempo_real(indices_subida);
+saida_analise = saida_real(indices_subida:end) - saida_real(indices_subida-1);
+
+%% Passo 2: Encontrar os Pontos de Interesse (28% e 40%)
+% Calcula o valor final da resposta
+y_final = 0.9855;
+
+% Calcula os valores de tensão correspondentes aos percentuais
+y_04_target = 0.4 * y_final;
+y_028_target = 0.28 * y_final;
+
+% Encontra os tempos exatos em que a curva atinge esses valores
+idx_028 = find(saida_analise >= y_028_target, 1, 'first');
+t_028 = tempo_analise(idx_028);
+
+idx_04 = find(saida_analise >= y_04_target, 1, 'first');
+t_04 = tempo_analise(idx_04);
+
+fprintf('\n--- Pontos de Medição para o Método de Smith ---\n');
+fprintf('Valor final (100%%): %.4f V\n', y_final);
+fprintf('Ponto de 28%%: %.4f V ocorre no tempo t_35 = %.4f s\n', y_028_target, t_028);
+fprintf('Ponto de 40%%: %.4f V ocorre no tempo t_85 = %.4f s\n', y_04_target, t_04);
+fprintf('--------------------------------------------------\n');
+
+%% Passo 3: Gerar o Gráfico Anotado
+figure;
+hold on;
+
+% Plota a curva de resposta principal
+plot(tempo_analise, saida_analise, 'b-', 'LineWidth', 2.5, 'DisplayName', 'Dados Experimentais');
+
+% --- ANOTAÇÕES NO GRÁFICO ---
+
+% Marcador e linhas para o ponto de 85.3%
+plot(t_04, y_04_target, 'ro', 'MarkerFaceColor', 'r', 'MarkerSize', 8);
+plot([0, t_04], [y_04_target, y_04_target], 'r--'); % Linha horizontal
+plot([t_04, t_04], [0, y_04_target], 'r--');       % Linha vertical
+text(t_04 + 0.01, y_04_target, ' 40%', 'Color', 'red', 'FontSize', 10, 'FontWeight', 'bold');
+
+% Marcador e linhas para o ponto de 35.3%
+plot(t_028, y_028_target, 'go', 'MarkerFaceColor', 'g', 'MarkerSize', 8);
+plot([0, t_028], [y_028_target, y_028_target], 'g--'); % Linha horizontal
+plot([t_028, t_028], [0, y_028_target], 'g--');       % Linha vertical
+text(t_028 + 0.01, y_028_target, ' 28%', 'Color', 'green', 'FontSize', 10, 'FontWeight', 'bold');
+
+% Linha do valor final
+yline(y_final, 'k:', 'LineWidth', 1.5, 'DisplayName', 'Valor Final (100%)');
+
+hold off;
+
+% Configuração final do Gráfico
+title('Análise da Resposta ao Degrau com Pontos de Medição');
+xlabel('Tempo (segundos)');
+ylabel('Variação da Saída (Volts)');
+grid on;
+legend('show', 'Location', 'southeast');
