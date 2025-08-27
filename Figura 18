@@ -1,0 +1,90 @@
+%--------------------------------------------------------------------------
+% SCRIPT PARA PLOTAR A RESPOSTA AO DEGRAU COM PONTOS DE MEDIÇÃO DESTACADOS
+%--------------------------------------------------------------------------
+
+% Passo 0: Preparação
+clear; clc; close all;
+
+%% Passo 1: Carregar e Preparar os Dados Reais
+nome_do_arquivo = 'meus_dados.txt'; 
+try
+    dados_completos = load(nome_do_arquivo);
+catch
+    error('Arquivo "%s" não encontrado. Verifique se ele está salvo na mesma pasta que este script.', nome_do_arquivo);
+end
+
+% Separa os dados em vetores
+tempo_real = dados_completos(:, 1);
+entrada_real = dados_completos(:, 2);
+saida_real = dados_completos(:, 3);
+disp('Dados reais carregados com sucesso!');
+
+% Isola e normaliza a resposta ao degrau
+indices_subida = find(entrada_real > 0.1, 1, 'first');
+tempo_analise = tempo_real(indices_subida:end) - tempo_real(indices_subida);
+saida_analise = saida_real(indices_subida:end) - saida_real(indices_subida-1);
+
+%% Passo 2: Encontrar os Pontos de Interesse (15%, 45% e 75%)
+% Calcula o valor final da resposta
+y_final = saida_analise(end);
+
+% Calcula os valores de tensão correspondentes aos percentuais
+y_15_target = 0.15 * y_final;
+y_45_target = 0.45 * y_final;
+y_75_target = 0.75 * y_final;
+
+% Encontra os tempos exatos em que a curva atinge esses valores
+idx_15 = find(saida_analise >= y_15_target, 1, 'first');
+t_15 = tempo_analise(idx_15);
+
+idx_45 = find(saida_analise >= y_45_target, 1, 'first');
+t_45 = tempo_analise(idx_45);
+
+idx_75 = find(saida_analise >= y_75_target, 1, 'first');
+t_75 = tempo_analise(idx_75);
+
+fprintf('\n--- Pontos de Medição ---\n');
+fprintf('Valor final (100%%): %.4f V\n', y_final);
+fprintf('Ponto de 15%%: %.4f V ocorre no tempo t_15 = %.4f s\n', y_15_target, t_15);
+fprintf('Ponto de 45%%: %.4f V ocorre no tempo t_45 = %.4f s\n', y_45_target, t_45);
+fprintf('Ponto de 75%%: %.4f V ocorre no tempo t_75 = %.4f s\n', y_75_target, t_75);
+fprintf('--------------------------------------------------\n');
+
+%% Passo 3: Gerar o Gráfico Anotado
+figure;
+hold on;
+
+% Plota a curva de resposta principal
+plot(tempo_analise, saida_analise, 'b-', 'LineWidth', 2.5, 'DisplayName', 'Dados Experimentais');
+
+% --- ANOTAÇÕES NO GRÁFICO ---
+
+% Marcador e linhas para o ponto de 75%
+plot(t_75, y_75_target, 'ro', 'MarkerFaceColor', 'r', 'MarkerSize', 8);
+plot([0, t_75], [y_75_target, y_75_target], 'r--'); % Linha horizontal
+plot([t_75, t_75], [0, y_75_target], 'r--');       % Linha vertical
+text(t_75 + 0.01, y_75_target, ' 75%', 'Color', 'red', 'FontSize', 10, 'FontWeight', 'bold');
+
+% Marcador e linhas para o ponto de 45%
+plot(t_45, y_45_target, 'mo', 'MarkerFaceColor', 'm', 'MarkerSize', 8);
+plot([0, t_45], [y_45_target, y_45_target], 'm--'); % Linha horizontal
+plot([t_45, t_45], [0, y_45_target], 'm--');       % Linha vertical
+text(t_45 + 0.01, y_45_target, ' 45%', 'Color', 'magenta', 'FontSize', 10, 'FontWeight', 'bold');
+
+% Marcador e linhas para o ponto de 15%
+plot(t_15, y_15_target, 'go', 'MarkerFaceColor', 'g', 'MarkerSize', 8);
+plot([0, t_15], [y_15_target, y_15_target], 'g--'); % Linha horizontal
+plot([t_15, t_15], [0, y_15_target], 'g--');       % Linha vertical
+text(t_15 + 0.01, y_15_target, ' 15%', 'Color', 'green', 'FontSize', 10, 'FontWeight', 'bold');
+
+% Linha do valor final
+yline(y_final, 'k:', 'LineWidth', 1.5, 'DisplayName', 'Valor Final (100%)');
+
+hold off;
+
+% Configuração final do Gráfico
+title('Análise da Resposta ao Degrau com Pontos de Medição');
+xlabel('Tempo (segundos)');
+ylabel('Variação da Saída (Volts)');
+grid on;
+legend('show', 'Location', 'southeast');
