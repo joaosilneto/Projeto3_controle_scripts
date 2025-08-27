@@ -1,0 +1,57 @@
+%--------------------------------------------------------------------------
+% SCRIPT PARA PLOTAR A RESPOSTA AO DEGRAU EM MALHA FECHADA
+% (COM LINHA DE REFERÊNCIA PARA VISUALIZAÇÃO DO ERRO)
+%--------------------------------------------------------------------------
+
+% Passo 0: Preparação do Ambiente
+clear;
+clc;
+close all;
+
+%% Passo 1: Definição da Função de Transferência de Malha Fechada G(s)
+num = [-6.111, 1095];
+den = [1, 178.779, 2206.11];
+G_malha_fechada = tf(num, den);
+
+disp('Sistema em Malha Fechada G_MF(s):');
+disp(G_malha_fechada);
+
+%% Passo 2: Definição dos Parâmetros da Simulação
+amplitude_degrau = 1.8;
+
+%% Passo 3: Simulação e Plotagem da Resposta ao Degrau
+figure;
+step(G_malha_fechada * amplitude_degrau);
+
+%% Passo 4: Melhorando a Aparência do Gráfico
+title('Resposta do Sistema em Malha Fechada a um Degrau de Amplitude 1.8');
+xlabel('Tempo (segundos)');
+ylabel('Amplitude de Saída');
+grid on;
+
+% Pega os elementos do gráfico para a legenda
+ax = gca;
+h_line = findobj(ax, 'Type', 'line');
+
+% Calcula o valor final esperado da SAÍDA
+ganho_dc = dcgain(G_malha_fechada);
+valor_final_esperado = ganho_dc * amplitude_degrau;
+
+% --- LINHAS ADICIONADAS E CORRIGIDAS AQUI ---
+
+% Plota a linha de referência da ENTRADA (o degrau) em preto
+yline(amplitude_degrau, 'k-', 'LineWidth', 2, 'Label', 'Referência de Entrada (1.8V)');
+
+% Plota a linha do valor final da SAÍDA em vermelho tracejado
+yline(valor_final_esperado, 'r--', 'LineWidth', 1.5, 'Label', ...
+    sprintf('Valor Final da Saída (%.3fV)', valor_final_esperado));
+% --------------------------------------------------
+
+% Define os limites do eixo Y para uma melhor visualização
+ylim([-0.2, 2]);
+
+% Atualiza a legenda para incluir a curva de resposta
+legend(h_line, 'Resposta do Sistema y(t)', 'Location', 'southeast');
+
+
+disp('Gráfico da resposta ao degrau gerado com a referência de entrada!');
