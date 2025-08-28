@@ -1,0 +1,71 @@
+%--------------------------------------------------------------------------
+% SCRIPT DE ANÁLISE DO CONTROLADOR PID COM O MODELO S-K (COM IAE E ITAE)
+%--------------------------------------------------------------------------
+
+% Passo 0: Preparação do Ambiente
+clear; clc; close all;
+
+%% Passo 1: Definir a Função de Transferência da Planta (Modelo S-K)
+num_planta_sk = [-0.0055, 0.9855];
+den_planta_sk = [0.0009, 0.1664, 1];
+G_sk = tf(num_planta_sk, den_planta_sk);
+disp('Planta utilizada: Modelo de Sundaresan-Krishnaswamy');
+
+%% Passo 2: Definir os Parâmetros do Controlador PID (Seus Valores)
+Kp = 16.049;
+Ti = 0.0224;
+Td = 0.0056;
+
+%% Passo 3: Criar os Controladores (Ideal e com Filtro)
+C_pid_ideal = pid(Kp, Kp/Ti, Kp*Td);
+C_pid_ideal.Name = 'PID Ideal';
+alpha = 0.1;
+Tf = alpha * Td;
+C_pid_filtrado = pid(Kp, Kp/Ti, Kp*Td, Tf);
+C_pid_filtrado.Name = 'PID com Filtro';
+controladores = {C_pid_ideal, C_pid_filtrado};
+
+%% Passo 4: Simular e Analisar as Respostas
+amplitude_degrau = 1.8;
+figure;
+hold on;
+cores = {'b-', 'r--'};
+legend_entries = {};
+
+% Prepara a tabela de resultados
+resultados = table('Size', [length(controladores), 2], 'VariableTypes', {'double', 'double'}, 'VariableNames', {'IAE', 'ITAE'}, 'RowNames', {controladores{1}.Name, controladores{2}.Name});
+
+for i = 1:length(controladores)
+    C_atual = controladores{i};
+    T = feedback(C_atual * G_sk, 1);
+    
+    [y, t] = step(T); % Simula a resposta ao degrau unitário
+    y_escalado = y * amplitude_degrau;
+    
+    plot(t, y_escalado, cores{i}, 'LineWidth', 2);
+    legend_entries{end+1} = C_atual.Name;
+    
+    % --- CÁLCULO DOS ÍNDICES IAE e ITAE ---
+    referencia = ones(size(y_escalado)) * y_escalado(end); % Referência é o valor final
+    erro = referencia - y_escalado;
+    
+    IAE = trapz(t, abs(erro));
+    ITAE = trapz(t, t .* abs(erro));
+    
+    % Armazena os resultados na tabela
+    resultados.IAE(i) = IAE;
+    resultados.ITAE(i) = ITAE;
+    % ------------------------------------
+end
+
+yline(amplitude_degrau, 'k:', 'LineWidth', 1.5);
+legend_entries{end+1} = 'Referência de Entrada';
+
+hold off;
+title('Comparação de PID Ideal vs. com Filtro (Modelo S-K)');
+xlabel('Tempo (segundos)'); ylabel('Amplitude de Saída'); grid on;
+legend(legend_entries, 'Location', 'best');
+
+% Exibe a tabela de resultados
+disp('--- Índices de Desempenho (Modelo S-K) ---');
+disp(resultados);
