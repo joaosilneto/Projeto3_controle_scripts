@@ -1,0 +1,100 @@
+%--------------------------------------------------------------------------
+% SCRIPT DE COMPARAÇÃO FINAL DE TODOS OS MODELOS IDENTIFICADOS
+%--------------------------------------------------------------------------
+
+% Passo 0: Preparação
+clear; clc; close all;
+
+%% Passo 1: Carregar os Dados Reais do Arquivo
+nome_do_arquivo = 'meus_dados.txt'; 
+try
+    dados_completos = load(nome_do_arquivo);
+catch
+    error('Arquivo "%s" não encontrado. Verifique se ele está salvo na mesma pasta que este script.', nome_do_arquivo);
+end
+
+% Separa os dados em vetores
+tempo_real = dados_completos(:, 1);
+entrada_real = dados_completos(:, 2);
+saida_real = dados_completos(:, 3);
+disp('Dados reais carregados com sucesso!');
+
+% Isola e normaliza a resposta ao degrau para a plotagem e análise
+indices_subida = find(entrada_real > 0.1, 1, 'first');
+tempo_analise = tempo_real(indices_subida:end) - tempo_real(indices_subida);
+saida_analise = saida_real(indices_subida:end) - saida_real(indices_subida-1);
+amplitude_degrau = max(entrada_real) - min(entrada_real);
+
+%% Passo 2: Definir TODOS os Modelos Identificados
+% Insira aqui os parâmetros que você calculou para cada método
+
+% a) Modelo de Ziegler-Nichols (1ª Ordem)
+K_zn = 0.9857; theta_zn = 0.0032; tau_zn = 0.1452;
+G_zn = tf(K_zn, [tau_zn, 1], 'InputDelay', theta_zn);
+G_zn.Name = 'Ziegler-Nichols (1ª Ordem)';
+
+% b) Modelo de Smith (1ª Ordem - Manual)
+K_smith = 0.87455; tau_smith = 0.0525; theta_smith = 0;
+G_smith = tf(K_smith, [tau_smith, 1], 'InputDelay', theta_smith);
+G_smith.Name = 'Smith (1ª Ordem)';
+
+% c) Modelo de Sundaresan-Krishnaswamy (1ª Ordem)
+K_sk = 0.9855; tau_sk = 0.1608; theta_sk = 0.0112;
+G_sk = tf(K_sk, [tau_sk, 1], 'InputDelay', theta_sk);
+G_sk.Name = 'Sundaresan-K. (1ª Ordem)';
+
+% d) Modelo de Harriot (2ª Ordem)
+K_harriot = 0.9857; tau1_h = 0.1287; tau2_h = 0.0249;
+G_harriot = tf(K_harriot, [tau1_h*tau2_h, tau1_h+tau2_h, 1]);
+G_harriot.Name = 'Harriot (2ª Ordem)';
+
+% e) Modelo de Mollenkamp (2ª Ordem)
+K_mollenkamp = 0.9857; tau1_m = 0.1242; tau2_m = 0.0249;
+G_mollenkamp = tf(K_mollenkamp, [tau1_m*tau2_m, tau1_m+tau2_m, 1]);
+G_mollenkamp.Name = 'Mollenkamp (2ª Ordem)';
+
+% Lista de todos os modelos para simular
+modelos = {G_zn, G_smith, G_sk, G_harriot, G_mollenkamp};
+
+%% Passo 3: Simular, Plotar e Calcular MSE para cada modelo
+figure;
+hold on;
+
+% Plota os dados reais (a "verdade")
+plot(tempo_analise, saida_analise, 'k-', 'LineWidth', 4, 'DisplayName', 'Dados Reais');
+
+% Prepara a tabela de resultados do MSE
+mse_resultados = [];
+cores = {'r--', 'g-.', 'c--', 'm-.', 'y-'}; % Estilos de linha para cada modelo
+
+for i = 1:length(modelos)
+    G_atual = modelos{i};
+    
+    % Simula a resposta do modelo
+    [saida_simulada, ~] = step(G_atual * amplitude_degrau, tempo_analise);
+    
+    % Plota a curva do modelo
+    plot(tempo_analise, saida_simulada, cores{i}, 'LineWidth', 2, 'DisplayName', G_atual.Name);
+    
+    % Calcula o MSE
+    len_real = length(saida_analise);
+    mse = mean((saida_analise - saida_simulada(1:len_real)).^2);
+    mse_resultados = [mse_resultados; mse];
+end
+
+hold off;
+
+% Configuração do Gráfico
+title('Validação Final: Comparação Entre Todos os Modelos Identificados');
+xlabel('Tempo (segundos)');
+ylabel('Amplitude de Saída');
+grid on;
+legend('show', 'Location', 'southeast');
+
+%% Passo 4: Exibir a Tabela de Erros (MSE)
+fprintf('\n\n--- TABELA FINAL DE VALIDAÇÃO ESTATÍSTICA (MSE) ---\n');
+fprintf('O modelo com o MENOR MSE é a melhor aproximação.\n\n');
+for i = 1:length(modelos)
+    fprintf('%-30s: MSE = %.6f\n', modelos{i}.Name, mse_resultados(i));
+end
+fprintf('-----------------------------------------------------\n');
