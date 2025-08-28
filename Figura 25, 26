@@ -13,7 +13,7 @@ num2 = [-0.6111, 1095];
 NUM = conv(num1, num2);
 
 den1 = [1, 64.26];
-den2 = [1, 178.78, 2206.11];
+den2 = [1, 184.89, 1111.11];
 DEN = conv(den1, den2);
 
 % Criação da função de transferência final
@@ -44,9 +44,6 @@ plot(t, y, 'b-', 'LineWidth', 2);
 yline(amplitude_degrau, 'k--', 'LineWidth', 2);
 
 % Calcula e plota o valor final esperado da SAÍDA em vermelho pontilhado
-ganho_dc = dcgain(Gs);
-valor_final_esperado = ganho_dc * amplitude_degrau;
-yline(valor_final_esperado, 'r:', 'LineWidth', 1.5);
 
 % -----------------------------------------------------------
 
@@ -60,12 +57,11 @@ grid on;
 
 % Adiciona a legenda para identificar todas as linhas
 legend('Resposta do Sistema y(t)', ...
-       'Referência de Entrada (1.8V)', ...
-       sprintf('Valor Final da Saída (%.3fV)', valor_final_esperado), ...
-       'Location', 'best');
-
+       'Referência de Entrada (1.8V)')
+      
 % Ajusta o limite do eixo Y de -0.2 a 2
 ylim([-0.2, 2]);
+
 
 
 disp('Gráfico completo gerado com sucesso!');
