@@ -7,7 +7,7 @@ clear; clc; close all;
 
 %% Passo 1: Definição da Função de Transferência
 % Ganhos e polinômios que você definiu
-k = 7.0827;
+k = 7.9171;
 num1 = [1, 6.2187];
 num2 = [-0.6111, 1095];
 NUM = conv(num1, num2);
