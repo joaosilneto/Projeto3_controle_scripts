@@ -2,10 +2,10 @@
 % SCRIPT PARA PLOTAR A RESPOSTA AO DEGRAU COM PONTOS DE MEDIÇÃO DESTACADOS
 %--------------------------------------------------------------------------
 
-% Passo 0: Preparação
+
 clear; clc; close all;
 
-%% Passo 1: Carregar e Preparar os Dados Reais
+
 nome_do_arquivo = 'meus_dados.txt'; 
 try
     dados_completos = load(nome_do_arquivo);
@@ -13,18 +13,17 @@ catch
     error('Arquivo "%s" não encontrado. Verifique se ele está salvo na mesma pasta que este script.', nome_do_arquivo);
 end
 
-% Separa os dados em vetores
 tempo_real = dados_completos(:, 1);
 entrada_real = dados_completos(:, 2);
 saida_real = dados_completos(:, 3);
 disp('Dados reais carregados com sucesso!');
 
-% Isola e normaliza a resposta ao degrau
+
 indices_subida = find(entrada_real > 0.1, 1, 'first');
 tempo_analise = tempo_real(indices_subida:end) - tempo_real(indices_subida);
 saida_analise = saida_real(indices_subida:end) - saida_real(indices_subida-1);
 
-%% Passo 2: Encontrar os Pontos de Interesse (15%, 45% e 75%)
+Encontrar os Pontos de Interesse (15%, 45% e 75%)
 % Calcula o valor final da resposta
 y_final = saida_analise(end);
 
@@ -50,14 +49,14 @@ fprintf('Ponto de 45%%: %.4f V ocorre no tempo t_45 = %.4f s\n', y_45_target, t_
 fprintf('Ponto de 75%%: %.4f V ocorre no tempo t_75 = %.4f s\n', y_75_target, t_75);
 fprintf('--------------------------------------------------\n');
 
-%% Passo 3: Gerar o Gráfico Anotado
+
 figure;
 hold on;
 
-% Plota a curva de resposta principal
+
 plot(tempo_analise, saida_analise, 'b-', 'LineWidth', 2.5, 'DisplayName', 'Dados Experimentais');
 
-% --- ANOTAÇÕES NO GRÁFICO ---
+
 
 % Marcador e linhas para o ponto de 75%
 plot(t_75, y_75_target, 'ro', 'MarkerFaceColor', 'r', 'MarkerSize', 8);
