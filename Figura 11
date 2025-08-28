@@ -1,11 +1,10 @@
 %--------------------------------------------------------------------------
-% SCRIPT DE ANÁLISE Z-N A PARTIR DO ARQUIVO "meus_dados.txt"
+% SCRIPT DE ANÁLISE Z-N A PARTIR DO MEU ARQUIVO
 %--------------------------------------------------------------------------
 
-% Passo 0: Preparação
+
 clear; clc; close all;
 
-%% Passo 1: Carregar os Dados do Arquivo de Texto
 nome_do_arquivo = 'meus_dados.txt'; 
 
 try
@@ -21,9 +20,7 @@ saida_y = dados_completos(:, 3);
 
 disp('Dados carregados com sucesso do arquivo!');
 
-%% ========================================================================
-%  PARTE 2: ANÁLISE DE ZIEGLER-NICHOLS
-%  ========================================================================
+
 disp('Iniciando análise de Ziegler-Nichols...');
 
 % Isola a resposta ao degrau
@@ -32,7 +29,6 @@ if isempty(indices_subida)
     error('Não foi possível encontrar um degrau de subida nos dados.');
 end
 
-% Normaliza os dados para a análise (tempo e saída começando em zero)
 tempo_analise = tempo(indices_subida:end) - tempo(indices_subida);
 saida_analise = saida_y(indices_subida:end) - saida_y(indices_subida-1);
 amplitude_degrau = max(entrada_u) - min(entrada_u);
@@ -52,15 +48,12 @@ theta = -c / m;
 T_final_tangente = (y_final - c) / m;
 tau = T_final_tangente - theta;
 
-%% ========================================================================
-%  PARTE 3: PLOTAGEM DO GRÁFICO DE ANÁLISE
-%  ========================================================================
 
 % Cria o vetor de dados para a linha tangente (apenas no intervalo relevante)
 tempo_tangente_plot = linspace(theta, T_final_tangente, 10);
 y_tangente_plot = m * tempo_tangente_plot + c;
 
-% Plota o Gráfico Completo
+
 figure;
 hold on;
 plot(tempo_analise, saida_analise, 'b-', 'LineWidth', 2.5, 'DisplayName', 'Dados Experimentais');
@@ -68,7 +61,7 @@ plot(tempo_tangente_plot, y_tangente_plot, 'r--', 'LineWidth', 1.5, 'DisplayName
 plot(t_infl, y_infl, 'ko', 'MarkerSize', 8, 'MarkerFaceColor', 'red', 'DisplayName', 'Ponto de Inflexão');
 yline(y_final, 'k:', 'LineWidth', 1, 'DisplayName', 'Valor Final');
 
-% Configuração do Gráfico
+
 title('Identificação pelo Método de Ziegler-Nichols');
 xlabel('Tempo (segundos)');
 ylabel('Amplitude de Saída');
@@ -82,9 +75,7 @@ catch
 end
 hold off;
 
-%% ========================================================================
-%  PARTE 4: EXIBIR OS RESULTADOS
-%  ========================================================================
+
 fprintf('\n--- Parâmetros de Ziegler-Nichols Identificados ---\n');
 fprintf('Ganho do Processo (K) = %.4f\n', K);
 fprintf('Tempo Morto (theta)   = %.4f segundos\n', theta);
