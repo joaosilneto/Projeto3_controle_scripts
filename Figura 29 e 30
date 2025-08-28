@@ -8,11 +8,11 @@ clear; clc; close all;
 %% Passo 1: Definição da Função de Transferência do Sistema Compensado
 
 % --- GANHO ---
-k = 7.1107 * 1.0827;
+k = 7.9171 * 1.0864;
 
 % --- NUMERADOR ---
 % Polinômios individuais do numerador
-num1 = [1, 0.7268];
+num1 = [1, 0.3276];
 num2 = [1, 6.2187];
 num3 = [-6.111, 1095];
 % Multiplica todos os polinômios do numerador
@@ -22,7 +22,7 @@ NUM = conv(conv(num1, num2), num3);
 % Polinômios individuais do denominador
 den1 = [1, 0.01];
 den2 = [1, 64.26];
-den3 = [1, 178.78, 2206.11];
+den3 = [1, 184.89, 1111.11];
 % Multiplica todos os polinômios do denominador (correção importante aqui)
 DEN = conv(conv(den1, den2), den3);
 
