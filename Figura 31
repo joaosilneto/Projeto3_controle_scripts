@@ -1,0 +1,56 @@
+%--------------------------------------------------------------------------
+% SCRIPT DE ANÁLISE DO CONTROLADOR PI COM O MODELO S-K
+%--------------------------------------------------------------------------
+
+% Passo 0: Preparação do Ambiente
+clear; clc; close all;
+
+%% Passo 1: Definir a Função de Transferência da Planta (Modelo S-K)
+% Este é o seu modelo estimado, já com a aproximação de Padé.
+num_planta_sk = [-0.0055, 0.9855];
+den_planta_sk = [0.0009, 0.1664, 1];
+G_sk = tf(num_planta_sk, den_planta_sk);
+
+disp('Planta utilizada: Modelo de Sundaresan-Krishnaswamy');
+disp(G_sk);
+
+%% Passo 2: Definir os Parâmetros do Controlador PI
+% --- INSIRA SEUS VALORES CALCULADOS AQUI ---
+Kp = 13.11;  % Substitua 1 pelo seu valor de Kp
+Ti = 0.03696;  % Substitua 1 pelo seu valor de Ti
+% -----------------------------------------
+
+% Calcula o ganho integral Ki a partir de Kp e Ti
+Ki = Kp / Ti;
+
+% Cria a função de transferência do controlador PI: C(s) = Kp + Ki/s
+C_pi = tf([Kp, Ki], [1, 0]);
+
+disp('Controlador PI projetado:');
+disp(C_pi);
+
+%% Passo 3: Montar o Sistema em Malha Fechada
+% 1. Coloca o controlador em cascata com a planta
+L_sk = C_pi * G_sk;
+
+% 2. Fecha a malha com realimentação unitária negativa
+T_sk = feedback(L_sk, 1);
+
+disp('Função Final em Malha Fechada (com Modelo S-K):');
+disp(T_sk);
+
+%% Passo 4: Simular e Analisar a Resposta ao Degrau
+figure;
+step(T_sk*1.8); % Plota a resposta para um degrau unitário
+
+title('Resposta ao Degrau com PI (usando Modelo S-K)');
+xlabel('Tempo (segundos)');
+ylabel('Amplitude de Saída');
+grid on;
+
+% Análise das características da resposta
+info = stepinfo(T_sk);
+fprintf('\n--- Análise da Resposta (Modelo S-K) ---\n');
+fprintf('Overshoot: %.2f %%\n', info.Overshoot);
+fprintf('Tempo de Estabelecimento: %.4f s\n', info.SettlingTime);
+fprintf('-----------------------------------------\n');
