@@ -2,10 +2,9 @@
 % SCRIPT DE COMPARAÇÃO FINAL DE TODOS OS MODELOS IDENTIFICADOS
 %--------------------------------------------------------------------------
 
-% Passo 0: Preparação
+
 clear; clc; close all;
 
-%% Passo 1: Carregar os Dados Reais do Arquivo
 nome_do_arquivo = 'meus_dados.txt'; 
 try
     dados_completos = load(nome_do_arquivo);
@@ -13,20 +12,19 @@ catch
     error('Arquivo "%s" não encontrado. Verifique se ele está salvo na mesma pasta que este script.', nome_do_arquivo);
 end
 
-% Separa os dados em vetores
+
 tempo_real = dados_completos(:, 1);
 entrada_real = dados_completos(:, 2);
 saida_real = dados_completos(:, 3);
 disp('Dados reais carregados com sucesso!');
 
-% Isola e normaliza a resposta ao degrau para a plotagem e análise
+
 indices_subida = find(entrada_real > 0.1, 1, 'first');
 tempo_analise = tempo_real(indices_subida:end) - tempo_real(indices_subida);
 saida_analise = saida_real(indices_subida:end) - saida_real(indices_subida-1);
 amplitude_degrau = max(entrada_real) - min(entrada_real);
 
-%% Passo 2: Definir TODOS os Modelos Identificados
-% Insira aqui os parâmetros que você calculou para cada método
+
 
 % a) Modelo de Ziegler-Nichols (1ª Ordem)
 K_zn = 0.9857; theta_zn = 0.0032; tau_zn = 0.1452;
@@ -53,10 +51,8 @@ K_mollenkamp = 0.9857; tau1_m = 0.1242; tau2_m = 0.0249;
 G_mollenkamp = tf(K_mollenkamp, [tau1_m*tau2_m, tau1_m+tau2_m, 1]);
 G_mollenkamp.Name = 'Mollenkamp (2ª Ordem)';
 
-% Lista de todos os modelos para simular
 modelos = {G_zn, G_smith, G_sk, G_harriot, G_mollenkamp};
 
-%% Passo 3: Simular, Plotar e Calcular MSE para cada modelo
 figure;
 hold on;
 
@@ -84,14 +80,13 @@ end
 
 hold off;
 
-% Configuração do Gráfico
 title('Validação Final: Comparação Entre Todos os Modelos Identificados');
 xlabel('Tempo (segundos)');
 ylabel('Amplitude de Saída');
 grid on;
 legend('show', 'Location', 'southeast');
 
-%% Passo 4: Exibir a Tabela de Erros (MSE)
+
 fprintf('\n\n--- TABELA FINAL DE VALIDAÇÃO ESTATÍSTICA (MSE) ---\n');
 fprintf('O modelo com o MENOR MSE é a melhor aproximação.\n\n');
 for i = 1:length(modelos)
