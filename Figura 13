@@ -1,11 +1,10 @@
 %--------------------------------------------------------------------------
-% SCRIPT DE CÁLCULO DO MSE DO MODELO DE SMITH (VERSÃO CORRIGIDA)
+% SCRIPT DE CÁLCULO DO MSE DO MODELO DE SMITH 
 %--------------------------------------------------------------------------
 
-% Passo 0: Preparação
 clear; clc; close all;
 
-%% Passo 1: Carregar os Dados Reais do Arquivo
+
 nome_do_arquivo = 'meus_dados.txt'; 
 try
     dados_completos = load(nome_do_arquivo);
@@ -13,20 +12,20 @@ catch
     error('Arquivo "%s" não encontrado. Verifique se ele está salvo na mesma pasta que este script.', nome_do_arquivo);
 end
 
-% Separa os dados em vetores
+
 tempo_real = dados_completos(:, 1);
 entrada_real = dados_completos(:, 2);
 saida_real = dados_completos(:, 3);
 disp('Dados reais carregados com sucesso!');
 
-%% Passo 2: Isolar e Preparar os Dados para Análise
+
 indices_subida = find(entrada_real > 0.1, 1, 'first');
 tempo_analise = tempo_real(indices_subida:end) - tempo_real(indices_subida);
 saida_analise = saida_real(indices_subida:end) - saida_real(indices_subida-1);
 amplitude_degrau = max(entrada_real) - min(entrada_real);
 
-%% Passo 3: Definir o Modelo de Smith Identificado
-% Inserimos os parâmetros que você calculou manualmente
+
+
 K_manual = 0.89856;
 tau_manual = 0.165;
 theta_manual = 0.005; % Td desprezível
@@ -35,16 +34,13 @@ G_smith = tf(K_manual, [tau_manual, 1], 'InputDelay', theta_manual);
 disp('Modelo de Smith (manual) criado:');
 disp(G_smith);
 
-%% Passo 4: Simular a Resposta do Modelo Identificado
 [saida_smith_simulada, ~] = step(G_smith * amplitude_degrau, tempo_analise);
 
-%% Passo 5: Calcular o MSE (COM CORREÇÃO)
 
-% --- CORREÇÃO APLICADA AQUI ---
+
 % N agora é o número total de pontos nos seus dados de análise
 N = length(saida_analise); 
 
-% Garante que os vetores tenham exatamente o mesmo tamanho
 saida_smith_simulada = saida_smith_simulada(1:N);
 % -------------------------------
 
@@ -55,7 +51,6 @@ fprintf('\n--- Validação Estatística (MSE) ---\n');
 fprintf('O Erro Quadrático Médio (MSE), calculado com N = %d pontos, é: %.6f\n', N, mse_calculado);
 fprintf('--------------------------------\n');
 
-%% Passo 6: Gerar o Gráfico Comparativo
 figure;
 hold on;
 plot(tempo_analise, saida_analise, 'b-', 'LineWidth', 2.5, 'DisplayName', 'Dados Reais');
