@@ -2,10 +2,10 @@
 % SCRIPT PARA PLOTAR A RESPOSTA AO DEGRAU COM PONTOS DE MEDIÇÃO DESTACADOS
 %--------------------------------------------------------------------------
 
-% Passo 0: Preparação
+
 clear; clc; close all;
 
-%% Passo 1: Carregar e Preparar os Dados Reais
+
 nome_do_arquivo = 'meus_dados.txt'; 
 try
     dados_completos = load(nome_do_arquivo);
@@ -13,26 +13,24 @@ catch
     error('Arquivo "%s" não encontrado. Verifique se ele está salvo na mesma pasta que este script.', nome_do_arquivo);
 end
 
-% Separa os dados em vetores
 tempo_real = dados_completos(:, 1);
 entrada_real = dados_completos(:, 2);
 saida_real = dados_completos(:, 3);
 disp('Dados reais carregados com sucesso!');
 
-% Isola e normaliza a resposta ao degrau
+
 indices_subida = find(entrada_real > 0.1, 1, 'first');
 tempo_analise = tempo_real(indices_subida:end) - tempo_real(indices_subida);
 saida_analise = saida_real(indices_subida:end) - saida_real(indices_subida-1);
 
-%% Passo 2: Encontrar os Pontos de Interesse (35.3% e 82.3%)
 % Calcula o valor final da resposta
 y_final = saida_analise(end);
 
-% Calcula os valores de tensão correspondentes aos percentuais
+
 y_35_target = 0.353 * y_final;
 y_85_target = 0.853 * y_final;
 
-% Encontra os tempos exatos em que a curva atinge esses valores
+
 idx_35 = find(saida_analise >= y_35_target, 1, 'first');
 t_35 = tempo_analise(idx_35);
 
@@ -45,14 +43,14 @@ fprintf('Ponto de 35.3%%: %.4f V ocorre no tempo t_35 = %.4f s\n', y_35_target, 
 fprintf('Ponto de 85.32%%: %.4f V ocorre no tempo t_85 = %.4f s\n', y_85_target, t_85);
 fprintf('--------------------------------------------------\n');
 
-%% Passo 3: Gerar o Gráfico Anotado
+
 figure;
 hold on;
 
-% Plota a curva de resposta principal
+
 plot(tempo_analise, saida_analise, 'b-', 'LineWidth', 2.5, 'DisplayName', 'Dados Experimentais');
 
-% --- ANOTAÇÕES NO GRÁFICO ---
+
 
 % Marcador e linhas para o ponto de 85.3%
 plot(t_85, y_85_target, 'ro', 'MarkerFaceColor', 'r', 'MarkerSize', 8);
@@ -66,7 +64,7 @@ plot([0, t_35], [y_35_target, y_35_target], 'g--'); % Linha horizontal
 plot([t_35, t_35], [0, y_35_target], 'g--');       % Linha vertical
 text(t_35 + 0.01, y_35_target, ' 35.3%', 'Color', 'green', 'FontSize', 10, 'FontWeight', 'bold');
 
-% Linha do valor final
+
 yline(y_final, 'k:', 'LineWidth', 1.5, 'DisplayName', 'Valor Final (100%)');
 
 hold off;
