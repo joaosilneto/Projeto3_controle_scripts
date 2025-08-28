@@ -1,0 +1,53 @@
+%--------------------------------------------------------------------------
+% SCRIPT DE ANÁLISE DO CONTROLADOR PI COM O MODELO FENOMENOLÓGICO
+%--------------------------------------------------------------------------
+
+% Passo 0: Preparação do Ambiente
+clear; clc; close all;
+
+%% Passo 1: Definir a Função de Transferência da Planta (Modelo Fenomenológico)
+% Este é o seu modelo teórico, superamortecido.
+num_planta_teo = 195.4;
+den_planta_teo = [1, 67.05, 195.4];
+G_teo = tf(num_planta_teo, den_planta_teo);
+
+disp('Planta utilizada: Modelo Fenomenológico');
+disp(G_teo);
+
+%% Passo 2: Definir os Parâmetros do Controlador PI
+% --- INSIRA SEUS VALORES CALCULADOS AQUI ---
+Kp = 5.09893;  % Substitua 1 pelo seu valor de Kp
+Ti = 0.1865;  % Substitua 1 pelo seu valor de Ti
+% -----------------------------------------
+
+% Calcula o ganho integral Ki
+Ki = Kp / Ti;
+
+% Cria a função de transferência do controlador PI
+C_pi = tf([Kp, Ki], [1, 0]);
+
+disp('Controlador PI projetado:');
+disp(C_pi);
+
+%% Passo 3: Montar o Sistema em Malha Fechada
+L_teo = C_pi * G_teo;
+T_teo = feedback(L_teo, 1);
+
+disp('Função Final em Malha Fechada (com Modelo Fenomenológico):');
+disp(T_teo);
+
+%% Passo 4: Simular e Analisar a Resposta ao Degrau
+figure;
+step(T_teo*1.8);
+
+title('Resposta ao Degrau com PI (usando Modelo Fenomenológico)');
+xlabel('Tempo (segundos)');
+ylabel('Amplitude de Saída');
+grid on;
+
+% Análise das características da resposta
+info = stepinfo(T_teo);
+fprintf('\n--- Análise da Resposta (Modelo Fenomenológico) ---\n');
+fprintf('Overshoot: %.2f %%\n', info.Overshoot);
+fprintf('Tempo de Estabelecimento: %.4f s\n', info.SettlingTime);
+fprintf('-----------------------------------------------------\n');
