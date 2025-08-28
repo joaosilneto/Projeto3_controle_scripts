@@ -1,0 +1,73 @@
+%--------------------------------------------------------------------------
+% SCRIPT PARA PLOTAR RESPOSTA AO DEGRAU COM REFERÊNCIA E EIXOS CUSTOMIZADOS
+%--------------------------------------------------------------------------
+
+% Passo 0: Preparação
+clear; clc; close all;
+
+%% Passo 1: Definição da Função de Transferência
+% Ganhos e polinômios que você definiu
+k = 8.5117;
+num1 = [1, 0.508];
+num2 = [-0.6111, 1095];
+NUM = conv(num1, num2);
+
+den1 = [1, 0.01];
+den2 = [1, 178.78, 2206.11];
+DEN = conv(den1, den2);
+
+% Criação da função de transferência final
+G = tf(NUM, DEN);
+Gs = k * G;
+
+disp('Sistema Final Gs(s):');
+disp(Gs);
+
+%% Passo 2: Geração dos Dados da Resposta ao Degrau
+amplitude_degrau = 1.8;
+
+GMF = feedback(Gs,1);
+
+% Em vez de plotar diretamente, primeiro calculamos os dados de saída 'y' e tempo 't'
+[y, t] = step(GMF * amplitude_degrau);
+
+%% Passo 3: Geração do Gráfico Completo
+figure();
+hold on; % "Segura" o gráfico para adicionar múltiplas curvas
+
+% Plota a curva de resposta do sistema em azul
+plot(t, y, 'b-', 'LineWidth', 2);
+
+% --- LINHAS ADICIONADAS PARA DEIXAR O DEGRAU EVIDENTE ---
+
+% Plota a linha de referência da ENTRADA (o degrau) em preto tracejado
+yline(amplitude_degrau, 'k--', 'LineWidth', 2);
+
+% Calcula e plota o valor final esperado da SAÍDA em vermelho pontilhado
+ganho_dc = dcgain(Gs);
+valor_final_esperado = ganho_dc * amplitude_degrau;
+yline(valor_final_esperado, 'r:', 'LineWidth', 1.5);
+
+% -----------------------------------------------------------
+
+hold off; % Libera o gráfico
+
+%% Passo 4: Ajuste Final dos Eixos e Detalhes
+title('Resposta ao Degrau com Referência de Entrada');
+xlabel('Tempo (segundos)');
+ylabel('Amplitude');
+grid on;
+
+% Adiciona a legenda para identificar todas as linhas
+legend('Resposta do Sistema y(t)', ...
+       'Referência de Entrada (1.8V)', ...
+       sprintf('Valor Final da Saída (%.3fV)', valor_final_esperado), ...
+       'Location', 'best');
+
+% Ajusta o limite do eixo Y de -0.2 a 2
+ylim([-0.2, 2]);
+
+
+disp('Gráfico completo gerado com sucesso!');
+figure(2);
+rlocus(Gs);
