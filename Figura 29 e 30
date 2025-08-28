@@ -2,15 +2,14 @@
 % SCRIPT DE ANÁLISE DE SISTEMA COMPENSADO (FORMATADO E CORRIGIDO)
 %--------------------------------------------------------------------------
 
-% Passo 0: Preparação
+
 clear; clc; close all;
 
-%% Passo 1: Definição da Função de Transferência do Sistema Compensado
 
-% --- GANHO ---
+
 k = 7.9171 * 1.0864;
 
-% --- NUMERADOR ---
+
 % Polinômios individuais do numerador
 num1 = [1, 0.3276];
 num2 = [1, 6.2187];
@@ -18,31 +17,27 @@ num3 = [-6.111, 1095];
 % Multiplica todos os polinômios do numerador
 NUM = conv(conv(num1, num2), num3);
 
-% --- DENOMINADOR ---
-% Polinômios individuais do denominador
+
 den1 = [1, 0.01];
 den2 = [1, 64.26];
 den3 = [1, 184.89, 1111.11];
-% Multiplica todos os polinômios do denominador (correção importante aqui)
+
 DEN = conv(conv(den1, den2), den3);
 
-% --- CRIAÇÃO DA FUNÇÃO DE TRANSFERÊNCIA ---
-% Gs é a função de malha aberta do sistema já com o compensador e o ganho
+
 G = tf(NUM, DEN);
 Gs = k * G;
 
 disp('Função de Transferência de Malha Aberta Compensada Gs(s):');
 disp(Gs);
 
-%% Passo 2: Análise da Resposta em Malha Fechada
 
-% Fecha a malha do sistema compensado
+
 Gmf = feedback(Gs, 1);
 
 disp('Função de Transferência de Malha Fechada Gmf(s):');
 disp(Gmf);
 
-% --- GRÁFICO 1: RESPOSTA AO DEGRAU ---
 figure(1);
 step(Gmf * 1.8); % Simula e plota para um degrau de 1.8
 grid on;
@@ -50,9 +45,8 @@ title('Resposta ao Degrau do Sistema Compensado em Malha Fechada');
 xlabel('Tempo (segundos)');
 ylabel('Amplitude de Saída');
 
-%% Passo 3: Análise do Lugar das Raízes (LGR)
 
-% --- GRÁFICO 2: LUGAR DAS RAÍZES ---
+
 figure(2);
 rlocus(Gs); % Plota o LGR da malha aberta compensada
 grid on;
