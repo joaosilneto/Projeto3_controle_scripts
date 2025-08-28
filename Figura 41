@@ -2,21 +2,19 @@
 % SCRIPT DE ANÁLISE DO CONTROLADOR PID COM O MODELO FENOMENOLÓGICO (COM IAE E ITAE)
 %--------------------------------------------------------------------------
 
-% Passo 0: Preparação do Ambiente
+
 clear; clc; close all;
 
-%% Passo 1: Definir a Função de Transferência da Planta (Modelo Fenomenológico)
 num_planta_teo = 195.4;
 den_planta_teo = [1, 67.05, 195.4];
 G_teo = tf(num_planta_teo, den_planta_teo);
 disp('Planta utilizada: Modelo Fenomenológico');
 
-%% Passo 2: Definir os Parâmetros do Controlador PID (Seus Valores)
+
 Kp = 8.7410;
 Ti = 0.1608;
 Td = 0.0056;
 
-%% Passo 3: Criar os Controladores (Ideal e com Filtro)
 C_pid_ideal = pid(Kp, Kp/Ti, Kp*Td);
 C_pid_ideal.Name = 'PID Ideal';
 alpha = 0.1;
@@ -25,7 +23,6 @@ C_pid_filtrado = pid(Kp, Kp/Ti, Kp*Td, Tf);
 C_pid_filtrado.Name = 'PID com Filtro';
 controladores = {C_pid_ideal, C_pid_filtrado};
 
-%% Passo 4: Simular e Analisar as Respostas
 amplitude_degrau = 1.8;
 figure;
 hold on;
@@ -43,7 +40,6 @@ for i = 1:length(controladores)
     plot(t, y_escalado, cores{i}, 'LineWidth', 2);
     legend_entries{end+1} = C_atual.Name;
     
-    % --- CÁLCULO DOS ÍNDICES IAE e ITAE ---
     referencia = ones(size(y_escalado)) * y_escalado(end);
     erro = referencia - y_escalado;
     
