@@ -5,8 +5,7 @@
 % Passo 0: Preparação
 clear; clc; close all;
 
-%% Passo 1: Definição da Função de Transferência
-% Ganhos e polinômios que você definiu
+
 k = 7.9171;
 num1 = [1, 6.2187];
 num2 = [-0.6111, 1095];
@@ -16,7 +15,7 @@ den1 = [1, 64.26];
 den2 = [1, 184.89, 1111.11];
 DEN = conv(den1, den2);
 
-% Criação da função de transferência final
+
 G = tf(NUM, DEN);
 Gs = k * G;
 
@@ -25,37 +24,31 @@ disp(Gs);
 
 Gmf = feedback(Gs,1);
 
-%% Passo 2: Geração dos Dados da Resposta ao Degrau
 amplitude_degrau = 1.8;
 
-% Em vez de plotar diretamente, primeiro calculamos os dados de saída 'y' e tempo 't'
 [y, t] = step(Gmf * amplitude_degrau);
 
-%% Passo 3: Geração do Gráfico Completo
+
 figure();
 hold on; % "Segura" o gráfico para adicionar múltiplas curvas
 
-% Plota a curva de resposta do sistema em azul
 plot(t, y, 'b-', 'LineWidth', 2);
 
-% --- LINHAS ADICIONADAS PARA DEIXAR O DEGRAU EVIDENTE ---
 
-% Plota a linha de referência da ENTRADA (o degrau) em preto tracejado
+
 yline(amplitude_degrau, 'k--', 'LineWidth', 2);
 
-% Calcula e plota o valor final esperado da SAÍDA em vermelho pontilhado
 
-% -----------------------------------------------------------
 
 hold off; % Libera o gráfico
 
-%% Passo 4: Ajuste Final dos Eixos e Detalhes
+
 title('Resposta ao Degrau com Referência de Entrada');
 xlabel('Tempo (segundos)');
 ylabel('Amplitude');
 grid on;
 
-% Adiciona a legenda para identificar todas as linhas
+
 legend('Resposta do Sistema y(t)', ...
        'Referência de Entrada (1.8V)')
       
