@@ -23,11 +23,13 @@ Gs = k * G;
 disp('Sistema Final Gs(s):');
 disp(Gs);
 
+Gmf = feedback(Gs,1);
+
 %% Passo 2: Geração dos Dados da Resposta ao Degrau
 amplitude_degrau = 1.8;
 
 % Em vez de plotar diretamente, primeiro calculamos os dados de saída 'y' e tempo 't'
-[y, t] = step(Gs * amplitude_degrau);
+[y, t] = step(Gmf * amplitude_degrau);
 
 %% Passo 3: Geração do Gráfico Completo
 figure();
